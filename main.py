@@ -62,7 +62,15 @@ def play():
         #fgmask = cv2.erode(fgmask, kernel, iterations=1)
        
         contours, hierarchy = cv2.findContours(fgmask, cv2.cv.CV_RETR_EXTERNAL, cv2.cv.CV_CHAIN_APPROX_NONE)
-        cv2.drawContours(frame, contours, -1, cv2.cv.Scalar(0, 0, 255), 2)
+        #cv2.drawContours(frame, contours, -1, cv2.cv.Scalar(0, 0, 255), 2)
+        
+        try: hierarchy = hierarchy[0]
+        except: hierarchy = []
+        for contour, hier in zip(contours, hierarchy):
+            (x, y, w, h) = cv2.boundingRect(contour)
+            if w > 30 and h > 30:
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2) 
+
         cv2.imshow('App', frame) 
 
         k = cv2.waitKey(30) & 0xff
@@ -73,4 +81,4 @@ def play():
 
 
 if __name__ == "__main__":
-    read('../video/CAM00206.mp4')
+    read('../video/video1_new.mp4')

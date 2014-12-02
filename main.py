@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import sys
 
 history = 500
 nmixtures = 5
@@ -81,4 +82,7 @@ def play():
 
 
 if __name__ == "__main__":
-    read('../video/video1_new.mp4')
+    if len(sys.argv) <= 1:
+        print "Usage: " + sys.argv[0] + " [filename.mp4]"
+    else:
+        read(sys.argv[1])

@@ -34,7 +34,9 @@ def setAlpha(value):
 
 def read(filename):
     global cap, fgbg, kernel
-    cv2.namedWindow('App', cv2.WINDOW_NORMAL)
+    cv2.namedWindow("App", cv2.WND_PROP_FULLSCREEN)          
+    cv2.setWindowProperty("App", cv2.WND_PROP_FULLSCREEN, cv2.cv.CV_WINDOW_FULLSCREEN)
+
     cv2.createTrackbar('history', 'App', history, 1000, setHistory)
     cv2.createTrackbar('nmixtures', 'App', nmixtures, 10, setNmixtures)
     cv2.createTrackbar('backgroundRatio', 'App', 6, 100, setBackgroundRatio)
@@ -55,9 +57,15 @@ def play():
         if ret == False:
             break
 
+        red = frame[:,:,2]
+        green = frame[:,:,1]
+        blue = frame[:,:,0]
+        #frame = red
         fgmask = fgbg.apply(frame, None, alpha)
         fgmask = cv2.erode(fgmask, kernel, iterations=1)
         fgmask = cv2.dilate(fgmask, kernel, iterations=1)
+
+        fgimg = cv2.cvtColor(fgmask, cv2.COLOR_GRAY2BGR)
 
         #fgmask = cv2.dilate(fgmask, kernel, iterations=1)
         #fgmask = cv2.erode(fgmask, kernel, iterations=1)
@@ -69,10 +77,13 @@ def play():
         except: hierarchy = []
         for contour, hier in zip(contours, hierarchy):
             (x, y, w, h) = cv2.boundingRect(contour)
-            if w > 30 and h > 30:
+            if w > 45 and h > 45:
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2) 
+                cv2.circle(frame, ((x + x + w)/2, (y + y + h)/2), 4, (0, 0, 255), -1)
+        cv2.line(frame, (40, 680), (1240, 680), (0, 255, 0), 10)
 
-        cv2.imshow('App', frame) 
+        image = np.hstack((frame, fgimg))
+        cv2.imshow('App', image) 
 
         k = cv2.waitKey(30) & 0xff
         if k == 27:

@@ -73,17 +73,21 @@ def play():
        
         contours, hierarchy = cv2.findContours(fgmask, cv2.cv.CV_RETR_EXTERNAL, cv2.cv.CV_CHAIN_APPROX_NONE)
         #cv2.drawContours(frame, contours, -1, cv2.cv.Scalar(0, 0, 255), 2)
-        cv2.rectangle(frame, (40, 680), (1240, 700), (0, 255, 0), cv2.cv.CV_FILLED)
+        p1 = (40, 680)
+        p2 = (1240, 700)
+        cv2.rectangle(frame, p1, p2, (0, 255, 0), cv2.cv.CV_FILLED)
         
         try: hierarchy = hierarchy[0]
         except: hierarchy = []
         for contour, hier in zip(contours, hierarchy):
             (x, y, w, h) = cv2.boundingRect(contour)
             if w > 45 and h > 45:
+                point = (x + x + w)/2, (y + y + h)/2
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2) 
-                cv2.circle(frame, ((x + x + w)/2, (y + y + h)/2), 4, (0, 0, 255), -1)
+                cv2.circle(frame, point, 6, (0, 0, 255), -1)
+                if point[0] > p1[0] and point[0] < p2[0] and point[1] > p1[1] and point[1] < p2[1]:
+                    counter += 1
 
-        counter += 1
         text = str(counter)
         cv2.putText(frame, text, (600, 100), cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 0, 255), 4)
         image = np.hstack((frame, fgimg))

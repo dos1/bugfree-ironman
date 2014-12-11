@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import sys
 
-history = 500
+history = 50
 nmixtures = 5
 backgroundRatio = 0.6
 noiseSigma = 0.01
@@ -52,6 +52,7 @@ def read(filename):
     play()
     
 def play():
+    counter = 0
     while(True):
         ret, frame = cap.read()
         if ret == False:
@@ -72,6 +73,7 @@ def play():
        
         contours, hierarchy = cv2.findContours(fgmask, cv2.cv.CV_RETR_EXTERNAL, cv2.cv.CV_CHAIN_APPROX_NONE)
         #cv2.drawContours(frame, contours, -1, cv2.cv.Scalar(0, 0, 255), 2)
+        cv2.rectangle(frame, (40, 680), (1240, 700), (0, 255, 0), cv2.cv.CV_FILLED)
         
         try: hierarchy = hierarchy[0]
         except: hierarchy = []
@@ -80,8 +82,10 @@ def play():
             if w > 45 and h > 45:
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2) 
                 cv2.circle(frame, ((x + x + w)/2, (y + y + h)/2), 4, (0, 0, 255), -1)
-        cv2.line(frame, (40, 680), (1240, 680), (0, 255, 0), 10)
 
+        counter += 1
+        text = str(counter)
+        cv2.putText(frame, text, (600, 100), cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 0, 255), 4)
         image = np.hstack((frame, fgimg))
         cv2.imshow('App', image) 
 

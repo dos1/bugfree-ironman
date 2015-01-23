@@ -7,54 +7,25 @@ nmixtures = 5
 backgroundRatio = 0.5
 alpha = 0.03
 
-
 class Point:
     def __init__(self, p=None):
         self.x = p[0]
         self.y = p[1]
-
-def setHistory(value):
-    global history, fgbg
-    history = value
-    fgbg = cv2.BackgroundSubtractorMOG(history, nmixtures, backgroundRatio)
-
-def setNmixtures(value):
-    global nmixtures, fgbg
-    nmixtures = value
-    fgbg = cv2.BackgroundSubtractorMOG(history, nmixtures, backgroundRatio)
-    
-def setBackgroundRatio(value):
-    global backgroundRatio, fgbg
-    backgroundRatio = (float)(value)/100
-    fgbg = cv2.BackgroundSubtractorMOG(history, nmixtures, backgroundRatio)
-
-def setAlpha(value):
-    global alpha, fgbg, cap
-    alpha = (float)(value)/100
 
 def read(filename):
     global cap, fgbg, kernel
     cv2.namedWindow("App", cv2.WND_PROP_FULLSCREEN)          
     cv2.setWindowProperty("App", cv2.WND_PROP_FULLSCREEN, cv2.cv.CV_WINDOW_FULLSCREEN)
 
-    cv2.createTrackbar('history', 'App', history, 1000, setHistory)
-    cv2.createTrackbar('nmixtures', 'App', nmixtures, 10, setNmixtures)
-    cv2.createTrackbar('backgroundRatio', 'App', (int)(backgroundRatio * 100), 100, setBackgroundRatio)
-    cv2.createTrackbar('alpha', 'App', (int)(alpha * 100), 100, setAlpha)
-
     kernel = np.ones((3, 3), np.uint8)
     fgbg = cv2.BackgroundSubtractorMOG(history, nmixtures, backgroundRatio)
-
     cap = cv2.VideoCapture(filename)
     cap.read()
-
     play()
 
 
 def play():
-    cframe = 0
-    counter = 0
-    counted = []
+    cframe, counter, counted = 0, 0, []
 
     while(True):
         ret, frame = cap.read()
@@ -62,15 +33,11 @@ def play():
             break
 
         cframe += 1
-        origframe = frame
         
         fgmask = fgbg.apply(frame, None, alpha)
-        #fgmask = cv2.erode(fgmask, kernel, iterations=2)
         thresh, fgmask = cv2.threshold(fgmask, 250, 255, cv2.THRESH_BINARY)
         fgmask = cv2.dilate(fgmask, kernel, iterations=4)
 
-        fgimg = cv2.cvtColor(fgmask, cv2.COLOR_GRAY2BGR)
-    
         contours, hierarchy = cv2.findContours(fgmask, cv2.cv.CV_RETR_EXTERNAL, cv2.cv.CV_CHAIN_APPROX_SIMPLE)
         p1 = (40, 660)
         pLT = Point(p1)
@@ -115,13 +82,12 @@ def play():
                        counter += 1
                        counted.append((middle, cframe))
 
-                cv2.rectangle(origframe, (x, y), (x + w, y + h), color, 2) 
-                cv2.circle(origframe, ((x + x + w)/2, (y + y + h)/2), 4, (0,0,255), -1)
+                cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2) 
+                cv2.circle(frame, ((x + x + w)/2, (y + y + h)/2), 4, (0,0,255), -1)
 
         text = str(counter)
         cv2.putText(frame, text, (600, 100), cv2.FONT_HERSHEY_SIMPLEX, 4, (0, 0, 255), 4)
-        image = np.hstack((origframe, fgimg))
-        cv2.imshow('App', image) 
+        cv2.imshow('App', frame) 
 
         k = cv2.waitKey(30) & 0xff
         if k == 27:
